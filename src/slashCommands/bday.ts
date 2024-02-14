@@ -38,29 +38,38 @@ const command: SlashCommand = {
             return;
         }
         const user = interaction.options.getUser("user", true);
-        // Create a new instance of the birthday model with MM/DD format
+        // creating the new birthday object
         const newBirthday = new birthday({
             name: name,
-            // Store the birthday as a string in MM/DD format
             birthday: dateString,
             userId: user.id
         });
+        // saving the new birthday to the database
 
-        try {
-            const savedBirthday = await newBirthday.save();
-            await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setDescription(`Successfully added ${name}'s birthday.`)
-                ]
-            });
-        } catch (error) {
-            console.error("Error saving birthday to database:", error);
-            await interaction.reply({
-                content: "There was an error adding the birthday to the database.",
-                ephemeral: true
-            });
-        }
+try {
+    if (await birthday.findOne({ userId: user.id })) { // Make sure this matches the schema definition
+        await interaction.reply({
+            content: "This user already has a birthday in the database.",
+            ephemeral: true
+        });
+        return;
+    } else {
+        const savedBirthday = await newBirthday.save();
+        await interaction.reply({
+            embeds: [
+                new EmbedBuilder()
+                    .setDescription(`Successfully added ${name}'s birthday.`)
+            ]
+        });
+    }
+    } catch (error) {
+        console.error("Error saving birthday to the database:", error);
+        await interaction.reply({
+            content: "There was an error adding the birthday to the database.",
+            ephemeral: true
+        });
+    }
+        
     }
 };
 

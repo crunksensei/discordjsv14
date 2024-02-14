@@ -27,8 +27,10 @@ readdirSync(handlersDir).forEach(handler => {
 })
 
 const job = schedule.scheduleJob('*/15 * * * * *', function(){
-    timed();
+  
+  // timed();
   });
+
 
 
 

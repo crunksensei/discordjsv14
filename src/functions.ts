@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import client from "./index"
 require("dotenv").config(); 
 
-const testChannel = `${process.env.test_Channel}`
+const testChannel = `${process.env.TEST_CHANNEL}`
 
 
 type colorType = "text" | "variable" | "error"
@@ -56,12 +56,12 @@ export const setGuildOption = async (guild: Guild, option: GuildOption, value: a
     foundGuild.save()
 }
 
-
+// function that is called when cron job goes off.
 export async function timed() {
-    console.log("Bot is online")
+
     try {
         const channel = await client.channels.fetch(testChannel);
-        // Check if the channel is text-based
+        
         if(!channel){
             console.log('Channel not found')
             return
