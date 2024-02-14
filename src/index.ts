@@ -1,12 +1,15 @@
-import { Client, GatewayIntentBits, Collection, PermissionFlagsBits,} from "discord.js";
+import { Client, GatewayIntentBits, Collection, PermissionFlagsBits, Presence,} from "discord.js";
 const { Guilds, MessageContent, GuildMessages, GuildMembers } = GatewayIntentBits
 const client = new Client({intents:[Guilds, MessageContent, GuildMessages, GuildMembers]})
+require("dotenv").config(); 
 import { Command, SlashCommand } from "./types";
-import { config } from "dotenv";
+import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
-config()
+import { mongo } from "mongoose";
 
+
+config()
 client.slashCommands = new Collection<string, SlashCommand>()
 client.commands = new Collection<string, Command>()
 client.cooldowns = new Collection<string, number>()
@@ -18,3 +21,4 @@ readdirSync(handlersDir).forEach(handler => {
 })
 
 client.login(process.env.TOKEN)
+
