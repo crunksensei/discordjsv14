@@ -4,6 +4,11 @@ import GuildDB from "./schemas/Guild"
 import { GuildOption } from "./types"
 import mongoose from "mongoose";
 
+import client from "./index"
+const testChannel = '796169093286723654'
+
+
+
 type colorType = "text" | "variable" | "error"
 
 const themeColors = {
@@ -50,3 +55,23 @@ export const setGuildOption = async (guild: Guild, option: GuildOption, value: a
     foundGuild.options[option] = value
     foundGuild.save()
 }
+
+
+export async function timed() {
+    console.log("Bot is online")
+    try {
+        const channel = await client.channels.fetch(testChannel);
+        // Check if the channel is text-based
+        if(!channel){
+            console.log('Channel not found')
+            return
+        
+        }
+        if (channel.isTextBased()) {
+            await channel.send('I am online');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+    }
+}
+
