@@ -3,10 +3,10 @@ import { Guild, GuildMember, PermissionFlagsBits, PermissionResolvable, Permissi
 import GuildDB from "./schemas/Guild"
 import { GuildOption } from "./types"
 import mongoose from "mongoose";
-
 import client from "./index"
-const testChannel = '796169093286723654'
+require("dotenv").config(); 
 
+const testChannel = `${process.env.test_Channel}`
 
 
 type colorType = "text" | "variable" | "error"
