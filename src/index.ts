@@ -7,7 +7,7 @@ import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
 import { mongo } from "mongoose";
-import { timed } from "./functions";
+import { timed, GameEvents } from "./functions";
 const schedule = require('node-schedule');
 
 
@@ -27,8 +27,8 @@ readdirSync(handlersDir).forEach(handler => {
 })
 
 const job = schedule.scheduleJob('*/15 * * * * *', function(){
-  
-  // timed();
+    // check for genshin impact events
+    // GameEvents()
   });
 
 
