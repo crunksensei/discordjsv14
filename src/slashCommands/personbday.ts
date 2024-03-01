@@ -17,10 +17,8 @@ const command : SlashCommand = {
         const name = interaction.options.getString("name", true).toLowerCase();
         // Find the birthday in the database
         const birthdayData = await birthday.find({ name: name});
-        const nameList = birthdayData.map((e:any) => `${e.name}` + ' has a birthday on ' + `${e.birthday}`);
+        const nameList = birthdayData.map((e:any) => `${e.name} ` + `<@${e.userId}>` + ' has a birthday on ' + `${e.birthday}`);
         const listString = nameList.join('\n');
-        console.log(listString);
-        
         if (birthdayData.length === 0) {
             await interaction.reply({
                 embeds: [

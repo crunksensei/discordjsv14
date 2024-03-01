@@ -3,6 +3,11 @@ import { Guild, GuildMember, PermissionFlagsBits, PermissionResolvable, Permissi
 import GuildDB from "./schemas/Guild"
 import { GuildOption } from "./types"
 import mongoose from "mongoose";
+import client from "./index"
+require("dotenv").config(); 
+
+const testChannel = `${process.env.TEST_CHANNEL}`
+
 
 type colorType = "text" | "variable" | "error"
 
@@ -50,3 +55,23 @@ export const setGuildOption = async (guild: Guild, option: GuildOption, value: a
     foundGuild.options[option] = value
     foundGuild.save()
 }
+
+// function that is called when cron job goes off.
+export async function timed() {
+
+    try {
+        const channel = await client.channels.fetch(testChannel);
+        
+        if(!channel){
+            console.log('Channel not found')
+            return
+        
+        }
+        if (channel.isTextBased()) {
+            await channel.send('I am online');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+    }
+}
+

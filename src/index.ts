@@ -7,6 +7,12 @@ import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
 import { mongo } from "mongoose";
+import { timed } from "./functions";
+const schedule = require('node-schedule');
+
+
+
+
 
 
 config()
@@ -20,5 +26,16 @@ readdirSync(handlersDir).forEach(handler => {
     require(`${handlersDir}/${handler}`)(client)
 })
 
+const job = schedule.scheduleJob('*/15 * * * * *', function(){
+  
+  // timed();
+  });
+
+
+
+
+
+
 client.login(process.env.TOKEN)
 
+export default client
