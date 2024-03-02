@@ -1,12 +1,14 @@
 import chalk from "chalk"
-import { Guild, GuildMember, PermissionFlagsBits, PermissionResolvable, PermissionsBitField, TextChannel } from "discord.js"
+import { Guild, GuildMember, PermissionFlagsBits, PermissionResolvable, PermissionsBitField, TextChannel, EmbedBuilder } from "discord.js"
 import GuildDB from "./schemas/Guild"
 import { GuildOption } from "./types"
 import mongoose from "mongoose";
 import client from "./index"
 require("dotenv").config(); 
-
-
+const quote = require("./schemas/quote");
+const birthday = require("./schemas/birthdays");
+const game = require("./schemas/game_events");
+const productionChannel = `${process.env.famDiscord}`
 const testChannel = `${process.env.test_Channel}`
 
 type colorType = "text" | "variable" | "error"
@@ -76,18 +78,101 @@ export async function timed() {
 }
 
 export async function GameEvents () {
+    const channel = await client.channels.fetch(`${testChannel}`);
+    const today = new Date();
+    let year = today.getFullYear();
+    let month = today.getMonth();
+    // Calculate the first day of the next month
+    const firstDayNextMonth = new Date(year, month + 1, 1);
+    // Calculate days until the first day of the next month
+    const daysUntilFirstDayNextMonth = Math.round((Number(firstDayNextMonth) - Number(today)) / (1000 * 60 * 60 * 24)) + 1;
+    
     try {
-        const channel = await client.channels.fetch(testChannel);
         if(!channel){
             console.log('Channel not found')
             return
         
         }
         if (channel.isTextBased()) {
-            await channel.send('game event happening now!');
+                if (daysUntilFirstDayNextMonth == 5) {
+                    await channel.send('Genshin Impact: 5 days left for the Spiral Abyss');
+                }
+                else if (daysUntilFirstDayNextMonth == 3) {
+                    await channel.send('Genshin Impact: 3 days left for the Spiral Abyss');
+                }
+                else if (daysUntilFirstDayNextMonth == 1) {
+                    await channel.send('Genshin Impact: Spiral Abyss reset tomorrow!');
+                }
+                else if (today.getDate() == 1) {
+                    await channel.send('Genshin Impact: Spiral Abyss reset today!');
+                }
+                return
         }
     }
     catch (error) {
         console.error('Error sending message:', error);
+        return "Failed to fetch the quote. Please try again later.";
     }
+}
+
+export async function randomQuote () {
+    const channel = await client.channels.fetch(`${productionChannel}`);
+    const randomQuote = await quote.aggregate([{ $sample: { size: 1 } }])
+    try {
+        if(!channel){
+            console.log('Channel not found')
+            return
+        }
+        if (channel.isTextBased()) {
+            await channel.send(`${randomQuote[0].quote} - ${randomQuote[0].author}`);
+        }
+    }
+    catch (error) {
+        console.error('Error sending message:', error);
+        return "Failed to fetch the quote. Please try again later.";
+    }
+
+}
+
+export async function birthdayReminder () {
+    const channel = await client.channels.fetch(`${testChannel}`);
+    const today = new Date();
+    let month:any = String(today.getMonth() + 1);
+    let day:any = String(today.getDate());
+    if (month.length < 2) {
+        month = '0' + month;
+    }
+    if (day.length < 2) {
+        day = '0' + day;
+    }
+    console.log(`${month}/${day}`)
+    const birthdayData = await birthday.find({ birthday: `${month}/${day}`});
+    const nameList = birthdayData.map((e:any) => `${toTitleCase(e.name)} ` + `<@${e.userId}>`);
+    const listString = nameList.join('\n');
+    console.log(nameList);
+    try {
+        if(!channel){
+            console.log('Channel not found')
+            return
+        }
+        if (channel.isTextBased() && nameList.length > 0) {
+            const birthdayEmbed = new EmbedBuilder()
+                .setColor('#0099ff') // Set the color of the embed
+                .setTitle("Today's Birthdays") // Set the title of the embed
+                .setDescription(`\n${listString}`) // Set the description (main content) of the embed
+                .setTimestamp() // Optionally, you can add a timestamp
+                .setFooter({ text: 'Happy Birthday!' }); // Optionally, add a footer
+
+            await channel.send({ embeds: [birthdayEmbed] });
+        }
+    }
+    catch (error) {
+        console.error('Error sending message:', error);
+        return "Failed to fetch the quote. Please try again later.";
+    }
+}
+
+//titleCase function
+function toTitleCase(str: string): string {
+    return str.toLowerCase().split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }

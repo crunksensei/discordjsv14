@@ -49,7 +49,7 @@ const command: SlashCommand = {
 try {
     if (await birthday.findOne({ userId: user.id })) { // Make sure this matches the schema definition
         await interaction.reply({
-            content: "This user already has a birthday in the database.",
+            content: "This user already has a birthday in the database. Contact server admin to change it.",
             ephemeral: true
         });
         return;
