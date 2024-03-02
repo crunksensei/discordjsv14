@@ -7,7 +7,7 @@ import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
 import { mongo } from "mongoose";
-import { timed, GameEvents, randomQuote, birthdayReminder } from "./functions";
+import { GameEvents, randomQuote, birthdayReminder } from "./functions";
 const schedule = require('node-schedule');
 
 
@@ -26,7 +26,7 @@ readdirSync(handlersDir).forEach(handler => {
     require(`${handlersDir}/${handler}`)(client)
 })
 
-const job = schedule.scheduleJob('* * 9 * * *', function(){
+const job = schedule.scheduleJob('0 0 9 * * *', function(){
     // check for genshin impact spiral abyss
     GameEvents()
     //random quote of the day

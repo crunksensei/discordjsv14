@@ -59,26 +59,26 @@ export const setGuildOption = async (guild: Guild, option: GuildOption, value: a
 }
 
 // function that is called when cron job goes off.
-export async function timed() {
+// export async function timed() {
 
-    try {
-        const channel = await client.channels.fetch(`${testChannel}`);
+//     try {
+//         const channel = await client.channels.fetch(`${testChannel}`);
         
-        if(!channel){
-            console.log('Channel not found')
-            return
+//         if(!channel){
+//             console.log('Channel not found')
+//             return
         
-        }
-        if (channel.isTextBased()) {
-            await channel.send('I am online');
-        }
-    } catch (error) {
-        console.error('Error sending message:', error);
-    }
-}
+//         }
+//         if (channel.isTextBased()) {
+//             await channel.send('I am online');
+//         }
+//     } catch (error) {
+//         console.error('Error sending message:', error);
+//     }
+// }
 
 export async function GameEvents () {
-    const channel = await client.channels.fetch(`${testChannel}`);
+    const channel = await client.channels.fetch(`${productionChannel}`);
     const today = new Date();
     let year = today.getFullYear();
     let month = today.getMonth();
@@ -135,7 +135,7 @@ export async function randomQuote () {
 }
 
 export async function birthdayReminder () {
-    const channel = await client.channels.fetch(`${testChannel}`);
+    const channel = await client.channels.fetch(`${productionChannel}`);
     const today = new Date();
     let month:any = String(today.getMonth() + 1);
     let day:any = String(today.getDate());

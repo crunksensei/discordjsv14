@@ -1,5 +1,4 @@
 import { SlashCommandBuilder, ChannelType, TextChannel, EmbedBuilder } from "discord.js"
-import { getThemeColor } from "../functions";
 import { SlashCommand } from "../types";
 
 const command : SlashCommand = {
