@@ -10,11 +10,6 @@ import { mongo } from "mongoose";
 import { GameEvents, randomQuote, birthdayReminder } from "./functions";
 const schedule = require('node-schedule');
 
-
-
-
-
-
 config()
 client.slashCommands = new Collection<string, SlashCommand>()
 client.commands = new Collection<string, Command>()
@@ -34,11 +29,6 @@ const job = schedule.scheduleJob('0 0 9 * * *', function(){
     //is it someone's birthday?
     birthdayReminder()
   });
-
-
-
-
-
 
 client.login(process.env.TOKEN)
 
