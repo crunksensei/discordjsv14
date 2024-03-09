@@ -11,6 +11,8 @@ const game = require("./schemas/game_events");
 const productionChannel = `${process.env.famDiscord}`
 const testChannel = `${process.env.test_Channel}`
 
+const activeChannel = productionChannel
+
 type colorType = "text" | "variable" | "error"
 
 const themeColors = {
@@ -78,7 +80,7 @@ export const setGuildOption = async (guild: Guild, option: GuildOption, value: a
 // }
 
 export async function GameEvents () {
-    const channel = await client.channels.fetch(`${productionChannel}`);
+    const channel = await client.channels.fetch(`${activeChannel}`);
     const today = new Date();
     let year = today.getFullYear();
     let month = today.getMonth();
@@ -91,7 +93,6 @@ export async function GameEvents () {
         if(!channel){
             console.log('Channel not found')
             return
-        
         }
         if (channel.isTextBased()) {
                 if (daysUntilFirstDayNextMonth == 5) {
@@ -116,15 +117,17 @@ export async function GameEvents () {
 }
 
 export async function randomQuote () {
-    const channel = await client.channels.fetch(`${productionChannel}`);
-    const randomQuote = await quote.aggregate([{ $sample: { size: 1 } }])
+    const channel = await client.channels.fetch(`${activeChannel}`);
+    const api_url ="https://zenquotes.io/api/today/";
     try {
         if(!channel){
             console.log('Channel not found')
             return
         }
         if (channel.isTextBased()) {
-            await channel.send(`${randomQuote[0].quote} - ${randomQuote[0].author}`);
+        const response = await fetch(api_url);
+        var data = await response.json();
+        await channel.send(data[0].q + " -" + data[0].a);
         }
     }
     catch (error) {
@@ -135,7 +138,7 @@ export async function randomQuote () {
 }
 
 export async function birthdayReminder () {
-    const channel = await client.channels.fetch(`${productionChannel}`);
+    const channel = await client.channels.fetch(`${activeChannel}`);
     const today = new Date();
     let month:any = String(today.getMonth() + 1);
     let day:any = String(today.getDate());
@@ -145,11 +148,9 @@ export async function birthdayReminder () {
     if (day.length < 2) {
         day = '0' + day;
     }
-    console.log(`${month}/${day}`)
     const birthdayData = await birthday.find({ birthday: `${month}/${day}`});
     const nameList = birthdayData.map((e:any) => `${toTitleCase(e.name)} ` + `<@${e.userId}>`);
     const listString = nameList.join('\n');
-    console.log(nameList);
     try {
         if(!channel){
             console.log('Channel not found')
