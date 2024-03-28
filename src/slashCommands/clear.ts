@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChannelType, PermissionFlagsBits, SlashCommandBuilder, GuildMember } from "discord.js";
 import { SlashCommand } from "../types";
 
 const ClearCommand : SlashCommand = {
@@ -13,7 +13,12 @@ const ClearCommand : SlashCommand = {
         .setDescription("Message amount to be cleared")
     })
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
-    execute: interaction => {
+    execute: async interaction => {
+        const member = interaction.member as GuildMember;
+        if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+            await interaction.reply({ content: "You do not have permission to use this command.", ephemeral: true });
+            return;
+        }
         let messageCount = Number(interaction.options.get("messagecount")?.value)
         interaction.channel?.messages.fetch({limit: messageCount})
         .then(async msgs => {
@@ -25,6 +30,7 @@ const ClearCommand : SlashCommand = {
         })
     },
     cooldown: 10
-}
+};
 
 export default ClearCommand;
+

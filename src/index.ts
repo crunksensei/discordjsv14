@@ -6,14 +6,8 @@ import { Command, SlashCommand } from "./types";
 import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { mongo } from "mongoose";
-import { timed } from "./functions";
+import { GameEvents, randomQuote, birthdayReminder, fridayMemes, fridayMeetings, firstOfDaMonth } from "./functions";
 const schedule = require('node-schedule');
-
-
-
-
-
 
 config()
 client.slashCommands = new Collection<string, SlashCommand>()
@@ -26,15 +20,17 @@ readdirSync(handlersDir).forEach(handler => {
     require(`${handlersDir}/${handler}`)(client)
 })
 
-const job = schedule.scheduleJob('*/15 * * * * *', function(){
-  
-  // timed();
+const job = schedule.scheduleJob('0 0 9 * * *', function(){
+    GameEvents()
+    randomQuote()
+    birthdayReminder()
+    firstOfDaMonth()
   });
 
-
-
-
-
+const jobFriday = schedule.scheduleJob('0 0 9 * * 5', function(){
+  fridayMemes()
+  fridayMeetings()
+  });
 
 client.login(process.env.TOKEN)
 

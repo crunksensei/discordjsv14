@@ -6,7 +6,7 @@ const birthday = require("../schemas/birthdays");
 const command: SlashCommand = {
     command: new SlashCommandBuilder()
         .setName("bdays")
-        .setDescription("Add Birthday to database.")
+        
         .addStringOption(option =>
             option
                 .setName("name")
@@ -23,7 +23,7 @@ const command: SlashCommand = {
                 .setDescription("Enter the birthday date in format (MM/DD/YYYY).")
                 .setRequired(true)
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+        .setDescription("Add Birthday to database."),
     execute: async interaction => {
         const name = interaction.options.getString("name", true).toLowerCase();
         const dateString = interaction.options.getString("date", true);
@@ -49,18 +49,17 @@ const command: SlashCommand = {
 try {
     if (await birthday.findOne({ userId: user.id })) { // Make sure this matches the schema definition
         await interaction.reply({
-            content: "This user already has a birthday in the database.",
+            content: "This user already has a birthday in the database. Contact server admin to change it.",
             ephemeral: true
         });
         return;
     } else {
         const savedBirthday = await newBirthday.save();
         await interaction.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setDescription(`Successfully added ${name}'s birthday.`)
-            ]
+            content: `Successfully added ${name}'s birthday.`,
+            ephemeral: true
         });
+        return;
     }
     } catch (error) {
         console.error("Error saving birthday to the database:", error);

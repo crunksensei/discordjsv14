@@ -4,7 +4,6 @@ import { SlashCommand } from "../types";
 const command : SlashCommand = {
     command: new SlashCommandBuilder()
     .setName("roll")
-    .setDescription("Rolls Dice")
     .addSubcommand(subcommand =>
         subcommand
             .setName("dice")
@@ -16,7 +15,7 @@ const command : SlashCommand = {
                     .setRequired(true)
             )
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    .setDescription("Rolls Dice"),
     execute: interaction => {
         const dice:number = Number(interaction.options.get("number")?.value)
         const answer = Math.floor(Math.random() * dice) + 1
