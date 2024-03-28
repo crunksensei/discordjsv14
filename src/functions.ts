@@ -11,9 +11,10 @@ const birthday = require("./schemas/birthdays");
 const game = require("./schemas/game_events");
 const productionChannel = `${process.env.famDiscord}`
 const testChannel = `${process.env.test_Channel}`
+const gameStudioGuild = `${process.env.gameStudio}`
 const fs = require('fs');
 
-const activeChannel = testChannel
+const activeChannel = gameStudioGuild
 
 type colorType = "text" | "variable" | "error"
 
