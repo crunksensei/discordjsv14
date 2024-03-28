@@ -1,17 +1,19 @@
 import chalk from "chalk"
-import { Guild, GuildMember, PermissionFlagsBits, PermissionResolvable, PermissionsBitField, TextChannel, EmbedBuilder } from "discord.js"
+import { Guild, GuildMember, PermissionFlagsBits, PermissionResolvable, PermissionsBitField, TextChannel, EmbedBuilder, AttachmentBuilder } from "discord.js"
 import GuildDB from "./schemas/Guild"
 import { GuildOption } from "./types"
 import mongoose from "mongoose";
 import client from "./index"
+import { fridayQuotes } from "./textQuotes/fridayQuotes";
 require("dotenv").config(); 
 const quote = require("./schemas/quote");
 const birthday = require("./schemas/birthdays");
 const game = require("./schemas/game_events");
 const productionChannel = `${process.env.famDiscord}`
 const testChannel = `${process.env.test_Channel}`
+const fs = require('fs');
 
-const activeChannel = productionChannel
+const activeChannel = testChannel
 
 type colorType = "text" | "variable" | "error"
 
@@ -60,25 +62,6 @@ export const setGuildOption = async (guild: Guild, option: GuildOption, value: a
     foundGuild.save()
 }
 
-// function that is called when cron job goes off.
-// export async function timed() {
-
-//     try {
-//         const channel = await client.channels.fetch(`${testChannel}`);
-        
-//         if(!channel){
-//             console.log('Channel not found')
-//             return
-        
-//         }
-//         if (channel.isTextBased()) {
-//             await channel.send('I am online');
-//         }
-//     } catch (error) {
-//         console.error('Error sending message:', error);
-//     }
-// }
-
 export async function GameEvents () {
     const channel = await client.channels.fetch(`${activeChannel}`);
     const today = new Date();
@@ -119,12 +102,14 @@ export async function GameEvents () {
 export async function randomQuote () {
     const channel = await client.channels.fetch(`${activeChannel}`);
     const api_url ="https://zenquotes.io/api/today/";
+    const Day = new Date();
+    const notFriday = Day.getDay();
     try {
         if(!channel){
             console.log('Channel not found')
             return
         }
-        if (channel.isTextBased()) {
+        if (channel.isTextBased() && notFriday !== 5) {
         const response = await fetch(api_url);
         var data = await response.json();
         await channel.send(data[0].q + " -" + data[0].a);
@@ -136,6 +121,59 @@ export async function randomQuote () {
     }
 
 }
+
+export async function fridayMeetings () {
+    const channel = await client.channels.fetch(`${activeChannel}`);
+    
+    try {
+        if(!channel){
+            console.log('Channel not found')
+            return
+        }
+        if (channel.isTextBased()) {
+          await channel.send('Meetings today at 9pm CST');
+        }
+    }
+    catch (error) {
+        console.error('Error sending message:', error);
+        return "Failed send meeting message.";
+    }
+
+}
+
+export async function fridayMemes () {
+    const channel = await client.channels.fetch(`${activeChannel}`);
+    const Memes = ["Videos/flatFuckFriday.mp4", 'Videos/rebeccaBlackFriday.mp4']
+    const randomMeme = Math.floor(Math.random() * Memes.length)
+    const randomQuote = Math.floor(Math.random() * fridayQuotes.length)
+    
+    try {
+        if(!channel){
+            console.log('Channel not found')
+            return
+        }
+        if (channel.isTextBased()) {
+            const birthdayEmbed = new EmbedBuilder()
+                .setColor('#0000FF') 
+                .setTitle(`Its Friday`) 
+                .setDescription(`${fridayQuotes[randomQuote]}`)
+
+            if (fs.existsSync(Memes[0])) {
+                const videoAttachment = new AttachmentBuilder(Memes[randomMeme])
+                await channel.send({ embeds: [birthdayEmbed], files: [videoAttachment] });
+            } else {
+                // Handle case for non-local (e.g., URL) media here, if necessary
+                console.log('File does not exist or is not a local file.');
+            }
+        }}
+    catch (error) {
+        console.error('Error sending message:', error);
+        return "Failed send meeting message.";
+    }
+
+}
+
+
 
 export async function birthdayReminder () {
     const channel = await client.channels.fetch(`${activeChannel}`);

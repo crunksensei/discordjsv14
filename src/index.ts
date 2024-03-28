@@ -6,7 +6,7 @@ import { Command, SlashCommand } from "./types";
 import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { GameEvents, randomQuote, birthdayReminder } from "./functions";
+import { GameEvents, randomQuote, birthdayReminder, fridayMemes, fridayMeetings } from "./functions";
 const schedule = require('node-schedule');
 
 config()
@@ -21,12 +21,14 @@ readdirSync(handlersDir).forEach(handler => {
 })
 
 const job = schedule.scheduleJob('0 0 9 * * *', function(){
-    // check for genshin impact spiral abyss
     GameEvents()
-    //random quote of the day
     randomQuote()
-    //is it someone's birthday?
     birthdayReminder()
+  });
+
+const jobFriday = schedule.scheduleJob('*/5 * * * * *', function(){
+  fridayMemes()
+  fridayMeetings()
   });
 
 client.login(process.env.TOKEN)
