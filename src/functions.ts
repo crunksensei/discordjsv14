@@ -87,7 +87,7 @@ export async function GameEvents () {
     // Calculate the first day of the next month
     const firstDayNextMonth = new Date(year, month + 1, 1);
     // Calculate days until the first day of the next month
-    const daysUntilFirstDayNextMonth = Math.round((Number(firstDayNextMonth) - Number(today)) / (1000 * 60 * 60 * 24)) + 1;
+    const daysUntilFirstDayNextMonth = Math.round((Number(firstDayNextMonth) - Number(today)) / (1000 * 60 * 60 * 24));
     
     try {
         if(!channel){

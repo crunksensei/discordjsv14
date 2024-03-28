@@ -6,7 +6,6 @@ import { Command, SlashCommand } from "./types";
 import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { mongo } from "mongoose";
 import { GameEvents, randomQuote, birthdayReminder } from "./functions";
 const schedule = require('node-schedule');
 
