@@ -161,9 +161,6 @@ export async function fridayMemes () {
             if (fs.existsSync(Memes[0])) {
                 const videoAttachment = new AttachmentBuilder(Memes[randomMeme])
                 await channel.send({ embeds: [birthdayEmbed], files: [videoAttachment] });
-            } else {
-                // Handle case for non-local (e.g., URL) media here, if necessary
-                console.log('File does not exist or is not a local file.');
             }
         }}
     catch (error) {
@@ -172,6 +169,34 @@ export async function fridayMemes () {
     }
 
 }
+
+export async function firstOfDaMonth () {
+    const channel = await client.channels.fetch(`${activeChannel}`);
+    const Day = new Date();
+    const firstOfTheMonth = Day.getDate();
+    const video = 'Videos/1stoftheMonth.mp4'
+    try {
+        if(!channel){
+            console.log('Channel not found')
+            return
+        }
+        if (channel.isTextBased() && firstOfTheMonth == 1) {
+            const birthdayEmbed = new EmbedBuilder()
+                .setColor('#0000FF') 
+                .setTitle(`Wake up`) 
+            if (fs.existsSync(video)) {
+                const videoAttachment = new AttachmentBuilder(video)
+                await channel.send({ embeds: [birthdayEmbed], files: [videoAttachment] });
+            }
+        }}
+    catch (error) {
+        console.error('Error sending message:', error);
+        return "Failed send meeting message.";
+    }
+
+}
+
+
 
 
 
