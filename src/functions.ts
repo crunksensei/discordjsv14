@@ -14,7 +14,7 @@ const testChannel = `${process.env.test_Channel}`
 const gameStudioGuild = `${process.env.gameStudio}`
 const fs = require('fs');
 
-const activeChannel = testChannel
+const activeChannel = gameStudioGuild
 
 type colorType = "text" | "variable" | "error"
 
