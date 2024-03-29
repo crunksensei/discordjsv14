@@ -14,7 +14,7 @@ const testChannel = `${process.env.test_Channel}`
 const gameStudioGuild = `${process.env.gameStudio}`
 const fs = require('fs');
 
-const activeChannel = gameStudioGuild
+const activeChannel = testChannel
 
 type colorType = "text" | "variable" | "error"
 
@@ -68,9 +68,7 @@ export async function GameEvents () {
     const today = new Date();
     let year = today.getFullYear();
     let month = today.getMonth();
-    // Calculate the first day of the next month
     const firstDayNextMonth = new Date(year, month + 1, 1);
-    // Calculate days until the first day of the next month
     const daysUntilFirstDayNextMonth = Math.round((Number(firstDayNextMonth) - Number(today)) / (1000 * 60 * 60 * 24));
     
     try {
