@@ -118,10 +118,9 @@ export async function randomQuote () {
         console.error('Error sending message:', error);
         return "Failed to fetch the quote. Please try again later.";
     }
-
 }
 
-export async function fridayMeetings () {
+export async function devMeetings () {
     const channel = await client.channels.fetch(`${activeChannel}`);
     
     try {
@@ -166,7 +165,6 @@ export async function fridayMemes () {
         console.error('Error sending message:', error);
         return "Failed send meeting message.";
     }
-
 }
 
 export async function firstOfDaMonth () {
@@ -194,9 +192,6 @@ export async function firstOfDaMonth () {
     }
 
 }
-
-
-
 
 
 export async function birthdayReminder () {
