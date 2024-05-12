@@ -328,7 +328,6 @@ export async function dailyIdeaBoard(){
     const lookup = await tracker.find({
         date: YesterdaysDate(),
       });
-    console.log(lookup)
     if (!lookup) return;
     const channel = await client.channels.fetch(`${activeChannel}`);
     if (!channel) return;

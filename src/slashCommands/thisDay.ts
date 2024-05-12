@@ -11,6 +11,7 @@ const command: SlashCommand = {
     .setName("thisday")
     .setDescription("What Happened Today?"),
   execute: async (interaction) => {
+    await interaction.deferReply();
     const api_url = "https://today.zenquotes.io/api";
     try {
       const response = await fetch(api_url);
@@ -31,7 +32,7 @@ const command: SlashCommand = {
       });
 
       // Reply with the embed
-      interaction.reply({
+      await interaction.editReply({
         embeds: [embed],
       });
     } catch (error) {
