@@ -21,44 +21,42 @@ readdirSync(handlersDir).forEach(handler => {
     require(`${handlersDir}/${handler}`)(client)
 })
 
-const job = schedule.scheduleJob('0 0 9 * * *', function(){
-  try {
-    GameEvents()
-    randomQuote()
-    birthdayReminder()
-    firstOfDaMonth()
-    dailyIdeaBoard()
-  } catch (error) {
-    console.log(error)
-  }
-    
+function scheduleJob(cronTime:any, jobFunction:any) {
+  return schedule.scheduleJob(cronTime, function() {
+    try {
+      jobFunction();
+    } catch (error) {
+      console.log(error);
+    }
   });
+}
 
-const jobFriday = schedule.scheduleJob('0 0 9 * * 5', function(){
-  try {
-    fridayMemes()
-  } catch (error) {
-    console.log(error)
-  }
-  
-  });
+// Define job functions
+function jobFunctions() {
+  GameEvents();
+  randomQuote();
+  birthdayReminder();
+  firstOfDaMonth();
+  dailyIdeaBoard();
+}
 
-const jobDev = schedule.scheduleJob('0 0 9 * * 4', function(){
-  try {
-    devMeetings()
-  } catch (error) {
-    console.log(error)
-  }
-  
-})
+function fridayMemesFunction() {
+  fridayMemes();
+}
 
-const dailyResets = schedule.scheduleJob('0 0 0 * * *', function(){
-  try {
-    dailyTrackerReset()
-  } catch (error) {
-    console.log(error)
-  }
-})
+function devMeetingsFunction() {
+  devMeetings();
+}
+
+function dailyTrackerResetFunction() {
+  dailyTrackerReset();
+}
+
+// Schedule jobs using the helper function
+const job = scheduleJob('0 0 9 * * *', jobFunctions);
+const jobFriday = scheduleJob('0 0 9 * * 5', fridayMemesFunction);
+const jobDev = scheduleJob('0 0 9 * * 4', devMeetingsFunction);
+const dailyResets = scheduleJob('0 0 0 * * *', dailyTrackerResetFunction);
 
 
 client.on('messageCreate', async message => {
