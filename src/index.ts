@@ -6,7 +6,7 @@ import { Command, SlashCommand } from "./types";
 import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { GameEvents, randomQuote, birthdayReminder, fridayMemes, devMeetings, firstOfDaMonth, ideaChecker, dailyIdeaBoard } from "./functions";
+import { GameEvents, randomQuote, birthdayReminder, fridayMemes, devMeetings, firstOfDaMonth, ideaChecker, dailyIdeaBoard, dailyTrackerReset } from "./functions";
 const schedule = require('node-schedule');
 
 config()
@@ -21,36 +21,61 @@ readdirSync(handlersDir).forEach(handler => {
     require(`${handlersDir}/${handler}`)(client)
 })
 
-const job = schedule.scheduleJob('0 0 9 * * *', function(){
-  try {
-    GameEvents()
-    randomQuote()
-    birthdayReminder()
-    firstOfDaMonth()
-    dailyIdeaBoard()
-  } catch (error) {
-    console.log(error)
-  }
-    
+function scheduleJob(cronTime:string, jobFunction:any) {
+  return schedule.scheduleJob(cronTime, function() {
+    try {
+      jobFunction();
+    } catch (error) {
+      console.log(error);
+    }
   });
+}
 
-const jobFriday = schedule.scheduleJob('0 0 9 * * 5', function(){
-  try {
-    fridayMemes()
-  } catch (error) {
-    console.log(error)
-  }
-  
-  });
+// async function testing(){
+//   try {
+//   GameEvents();
+  // randomQuote();
+  // birthdayReminder();
+  // firstOfDaMonth();
+  // dailyIdeaBoard();
+  // fridayMemes();
+  // devMeetings();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
-const jobDev = schedule.scheduleJob('0 0 9 * * 4', function(){
-  try {
-    devMeetings()
-  } catch (error) {
-    console.log(error)
-  }
-  
-})
+// const testingjob = scheduleJob('10 * * * * *', testing);
+
+// Define job functions
+function jobFunctions() {
+  GameEvents();
+  randomQuote();
+  birthdayReminder();
+  firstOfDaMonth();
+  dailyIdeaBoard();
+}
+
+function fridayMemesFunction() {
+  fridayMemes();
+}
+
+function devMeetingsFunction() {
+  devMeetings();
+}
+
+function dailyTrackerResetFunction() {
+  dailyTrackerReset();
+}
+
+// Schedule jobs using the helper function
+const job = scheduleJob('0 0 9 * * *', jobFunctions);
+const jobFriday = scheduleJob('0 0 9 * * 5', fridayMemesFunction);
+const jobDev = scheduleJob('0 0 9 * * 4', devMeetingsFunction);
+const dailyResets = scheduleJob('0 0 0 * * *', dailyTrackerResetFunction);
+
+
+
 
 
 client.on('messageCreate', async message => {
