@@ -8,14 +8,20 @@ const command : SlashCommand = {
     ,
     execute: async interaction => {
         const today = new Date();
-        let year = today.getFullYear();
-        let month = today.getMonth();
-        // Calculate the first day of the next month
+        const year = today.getFullYear();
+        const month = today.getMonth();   
         const firstDayNextMonth = new Date(year, month + 1, 1);
-        // Calculate days until the first day of the next month
-        const daysUntilFirstDayNextMonth = Math.round((Number(firstDayNextMonth) - Number(today)) / (1000 * 60 * 60 * 24));
+        const midMonthReset = new Date(year, month + (today.getDate() > 16 ? 1 : 0), 16);
+        const daysUntil = (date: Date) => Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const daysUntilFirstDayNextMonth = daysUntil(firstDayNextMonth);
+        const daysUntilMidMonthReset = daysUntil(midMonthReset);
+        const nearestReset = Math.min(daysUntilFirstDayNextMonth, daysUntilMidMonthReset);
+        const messageReset = today.getDate() == 1 ? "Spiral Abyss reset today."
+                        : nearestReset === 0 ? "Spiral Abyss resets today." 
+                        : nearestReset === 1 ? "Spiral Abyss resets tomorrow!" 
+                        : `Spiral Abyss resets in ${nearestReset} days.`;
         await interaction.reply({
-            content: `There are ${daysUntilFirstDayNextMonth} days until Spiral Abyss reset.`,
+            content: messageReset,
             ephemeral: true
         });
     },
