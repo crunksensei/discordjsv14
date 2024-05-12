@@ -21,7 +21,7 @@ readdirSync(handlersDir).forEach(handler => {
     require(`${handlersDir}/${handler}`)(client)
 })
 
-function scheduleJob(cronTime:any, jobFunction:any) {
+function scheduleJob(cronTime:string, jobFunction:any) {
   return schedule.scheduleJob(cronTime, function() {
     try {
       jobFunction();
