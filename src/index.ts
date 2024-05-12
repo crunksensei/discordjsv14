@@ -31,6 +31,22 @@ function scheduleJob(cronTime:any, jobFunction:any) {
   });
 }
 
+// async function testing(){
+//   try {
+//   GameEvents();
+  // randomQuote();
+  // birthdayReminder();
+  // firstOfDaMonth();
+  // dailyIdeaBoard();
+  // fridayMemes();
+  // devMeetings();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+// const testingjob = scheduleJob('10 * * * * *', testing);
+
 // Define job functions
 function jobFunctions() {
   GameEvents();
@@ -57,6 +73,9 @@ const job = scheduleJob('0 0 9 * * *', jobFunctions);
 const jobFriday = scheduleJob('0 0 9 * * 5', fridayMemesFunction);
 const jobDev = scheduleJob('0 0 9 * * 4', devMeetingsFunction);
 const dailyResets = scheduleJob('0 0 0 * * *', dailyTrackerResetFunction);
+
+
+
 
 
 client.on('messageCreate', async message => {

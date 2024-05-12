@@ -105,25 +105,24 @@ export async function GameEvents() {
   let year = today.getFullYear();
   let month = today.getMonth();
   const firstDayNextMonth = new Date(year, month + 1, 1);
-  const daysUntilFirstDayNextMonth = Math.round(
-    (Number(firstDayNextMonth) - Number(today)) / (1000 * 60 * 60 * 24)
-  );
-
+  const midMonthReset = new Date(year, month + (today.getDate() > 16 ? 1 : 0), 16);
+  const daysUntil = (date:any) => Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntilFirstDayNextMonth = daysUntil(firstDayNextMonth);
+  const daysUntilMidMonthReset = daysUntil(midMonthReset);
+  const nearestReset = Math.min(daysUntilFirstDayNextMonth, daysUntilMidMonthReset);
   try {
     if (!channel) {
       console.log("Channel not found");
       return;
     }
     if (channel.isTextBased()) {
-      if (daysUntilFirstDayNextMonth == 5) {
+      if (nearestReset == 5) {
         await channel.send("Genshin Impact: 5 days left for the Spiral Abyss");
-      } else if (daysUntilFirstDayNextMonth == 3) {
+      } else if (nearestReset == 3) {
         await channel.send("Genshin Impact: 3 days left for the Spiral Abyss");
-      } else if (daysUntilFirstDayNextMonth == 1) {
+      } else if (nearestReset == 1) {
         await channel.send("Genshin Impact: Spiral Abyss reset tomorrow!");
-      } else if (today.getDate() == 1) {
-        await channel.send("Genshin Impact: Spiral Abyss reset today!");
-      }
+      } 
       return;
     }
   } catch (error) {
@@ -162,7 +161,7 @@ export async function devMeetings() {
       return;
     }
     if (channel.isTextBased()) {
-      await channel.send("Meetings today at 9pm CST");
+      await channel.send("Meetings today at 8pm CST");
     }
   } catch (error) {
     console.error("Error sending message:", error);
@@ -268,24 +267,14 @@ export async function birthdayReminder() {
 
 export async function ideaChecker(messageAuthor: string, message: string) {
   try {
-    const newIdea = new idea({
-      userId: messageAuthor,
-      idea: message,
-    });
-    const savedIdea = await newIdea.save();
-    const trackerLookup = await tracker.findOne({
-      userId: messageAuthor,
-      date: formatDateToMMDDYYYY(new Date()),
-    });
-
-    if (!trackerLookup) {
-      const newTracker = new tracker({
-        userId: messageAuthor,
-        messagedToday: false,
-        date: formatDateToMMDDYYYY(new Date()),
-      });
-      await newTracker.save();
-    }
+    const newIdea = new idea({userId: messageAuthor,idea: message,});
+    await newIdea.save();
+    const currentDate = formatDateToMMDDYYYY(new Date());
+    const trackerLookup = await tracker.findOneAndUpdate(
+      { userId: messageAuthor, date: currentDate },
+      { $setOnInsert: { messagedToday: false } },
+      { upsert: true, new: true }
+    );
     await dailyMessageChecker(messageAuthor);
   } catch (error) {
     console.log(error);
@@ -299,50 +288,40 @@ async function dailyMessageChecker(messageAuthor: string) {
   endOfDay.setHours(23, 59, 59, 999);
   const lookup = await idea.find({
     userId: messageAuthor,
-    createdAt: {
-      $gte: startOfDay,
-      $lte: endOfDay,
-    },
+    createdAt: {$gte: startOfDay, $lte: endOfDay},
   });
+  if (lookup.length < 5) return;
   if (lookup.length >= 5) {
     const channel = await client.channels.fetch(`${activeChannel}`);
+    if (!channel || !channel.isTextBased()) return;
+    const trackerDate = formatDateToMMDDYYYY(new Date());
     const trackerLookup = await tracker.findOne({
       userId: messageAuthor,
-      date: formatDateToMMDDYYYY(new Date()),
+      date: trackerDate,
     });
-    if (!trackerLookup) return;
+    if (!trackerLookup || trackerLookup.messagedToday) return
     if (!trackerLookup.messagedToday) {
-      let filter = {
-        userId: messageAuthor,
-        date: formatDateToMMDDYYYY(new Date()),
-      };
-      await tracker.findOneAndUpdate(filter, { messagedToday: true });
-      if (channel && channel.isTextBased()) {
-        await channel.send(`☀️ <@${messageAuthor}>`);
-      }
+    await tracker.findOneAndUpdate({ userId: messageAuthor, date: trackerDate }, { messagedToday: true });
+    await channel.send(`☀️ <@${messageAuthor}>`);
     }
   }
 }
 
+//everyday at 9am CST it shows who made the 5 ideas
 export async function dailyIdeaBoard(){
     const lookup = await tracker.find({
         date: YesterdaysDate(),
       });
-    if (!lookup) return;
+    if (!lookup || lookup.length === 0) return;
     const channel = await client.channels.fetch(`${activeChannel}`);
-    if (!channel) return;
-    const mappingOverAllLookups = lookup.map((e: any) => {return e.messagedToday ? `<@${e.userId}> ☀️\n` : `<@${e.userId}> ⛈️\n`})
-    console.log(mappingOverAllLookups)
-    if (channel.isTextBased() && mappingOverAllLookups.length > 0){
-        const trackerEmbed = new EmbedBuilder()
-            .setColor("#0099ff") // Set the color of the embed
-            .setTitle("Daily Checkups for yesterdays ideas") // Set the title of the embed
-            .setDescription(`${mappingOverAllLookups.join('')}`) // Set the description (main content) of the embed
-    
-        await channel.send({ embeds: [trackerEmbed] });
-        
-    }
-
+    if (!channel || !channel.isTextBased()) return;
+    const messages = lookup.map((e:any) => `<@${e.userId}> ${e.messagedToday ? '☀️' : '⛈️'}`).join('\n');
+    if (!messages) return;
+    const trackerEmbed = new EmbedBuilder()
+    .setColor("#0099ff")
+    .setTitle("Daily Checkups for yesterday's ideas")
+    .setDescription(messages);
+    await channel.send({ embeds: [trackerEmbed] });
 }
 
 
@@ -354,16 +333,20 @@ export async function dailyTrackerReset(){
     date: YesterdaysDate(),
   });
 
-  if (!trackerLookup) return
-  for (let i = 0; i < trackerLookup.length; i++){
-    const newTracker = new tracker({
-      userId: trackerLookup[i].userId,
+  if (!trackerLookup || trackerLookup.length === 0) return;
+
+  const newTrackers = trackerLookup.map(({ userId }: { userId: string }) => {
+    return new tracker({
+      userId,
       messagedToday: false,
       date: formatDateToMMDDYYYY(new Date()),
-    });
-    await newTracker.save();
-  }
+    }).save();
+  });
+
+  await Promise.all(newTrackers);
 }
+
+
 
 
 
