@@ -318,7 +318,7 @@ async function dailyMessageChecker(messageAuthor: string) {
       };
       await tracker.findOneAndUpdate(filter, { messagedToday: true });
       if (channel && channel.isTextBased()) {
-        await channel.send("☀️");
+        await channel.send(`☀️ <@${messageAuthor}>`);
       }
     }
   }
@@ -333,7 +333,7 @@ export async function dailyIdeaBoard(){
     if (!channel) return;
     const mappingOverAllLookups = lookup.map((e: any) => {return e.messagedToday ? `<@${e.userId}> ☀️\n` : `<@${e.userId}> ⛈️\n`})
     console.log(mappingOverAllLookups)
-    if (channel.isTextBased()){
+    if (channel.isTextBased() && mappingOverAllLookups.length > 0){
         const trackerEmbed = new EmbedBuilder()
             .setColor("#0099ff") // Set the color of the embed
             .setTitle("Daily Checkups for yesterdays ideas") // Set the title of the embed

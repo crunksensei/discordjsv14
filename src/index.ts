@@ -22,21 +22,35 @@ readdirSync(handlersDir).forEach(handler => {
 })
 
 const job = schedule.scheduleJob('0 0 9 * * *', function(){
+  try {
     GameEvents()
     randomQuote()
     birthdayReminder()
     firstOfDaMonth()
     dailyIdeaBoard()
+  } catch (error) {
+    console.log(error)
+  }
+    
   });
 
 const jobFriday = schedule.scheduleJob('0 0 9 * * 5', function(){
-  fridayMemes()
+  try {
+    fridayMemes()
+  } catch (error) {
+    console.log(error)
+  }
+  
   });
 
 const jobDev = schedule.scheduleJob('0 0 9 * * 4', function(){
-  devMeetings()
+  try {
+    devMeetings()
+  } catch (error) {
+    console.log(error)
+  }
+  
 })
-
 
 
 client.on('messageCreate', async message => {
