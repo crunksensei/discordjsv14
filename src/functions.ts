@@ -346,6 +346,30 @@ export async function dailyIdeaBoard(){
 }
 
 
+
+//Daily Reset for the tracker
+
+export async function dailyTrackerReset(){
+  const trackerLookup = await tracker.find({
+    date: YesterdaysDate(),
+  });
+
+  if (!trackerLookup) return
+  for (let i = 0; i < trackerLookup.length; i++){
+    const newTracker = new tracker({
+      userId: trackerLookup[i].userId,
+      messagedToday: false,
+      date: formatDateToMMDDYYYY(new Date()),
+    });
+    await newTracker.save();
+  }
+}
+
+
+
+
+//UTILITIES
+
 //titleCase function
 function toTitleCase(str: string): string {
   return str

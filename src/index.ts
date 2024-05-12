@@ -6,7 +6,7 @@ import { Command, SlashCommand } from "./types";
 import { config, configDotenv } from "dotenv";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { GameEvents, randomQuote, birthdayReminder, fridayMemes, devMeetings, firstOfDaMonth, ideaChecker, dailyIdeaBoard } from "./functions";
+import { GameEvents, randomQuote, birthdayReminder, fridayMemes, devMeetings, firstOfDaMonth, ideaChecker, dailyIdeaBoard, dailyTrackerReset } from "./functions";
 const schedule = require('node-schedule');
 
 config()
@@ -50,6 +50,14 @@ const jobDev = schedule.scheduleJob('0 0 9 * * 4', function(){
     console.log(error)
   }
   
+})
+
+const dailyResets = schedule.scheduleJob('0 0 0 * * *', function(){
+  try {
+    dailyTrackerReset()
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 
