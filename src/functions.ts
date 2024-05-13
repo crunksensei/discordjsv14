@@ -105,11 +105,19 @@ export async function GameEvents() {
   let year = today.getFullYear();
   let month = today.getMonth();
   const firstDayNextMonth = new Date(year, month + 1, 1);
-  const midMonthReset = new Date(year, month + (today.getDate() > 16 ? 1 : 0), 16);
-  const daysUntil = (date:any) => Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const midMonthReset = new Date(
+    year,
+    month + (today.getDate() > 16 ? 1 : 0),
+    16
+  );
+  const daysUntil = (date: any) =>
+    Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   const daysUntilFirstDayNextMonth = daysUntil(firstDayNextMonth);
   const daysUntilMidMonthReset = daysUntil(midMonthReset);
-  const nearestReset = Math.min(daysUntilFirstDayNextMonth, daysUntilMidMonthReset);
+  const nearestReset = Math.min(
+    daysUntilFirstDayNextMonth,
+    daysUntilMidMonthReset
+  );
   try {
     if (!channel) {
       console.log("Channel not found");
@@ -122,7 +130,7 @@ export async function GameEvents() {
         await channel.send("Genshin Impact: 3 days left for the Spiral Abyss");
       } else if (nearestReset == 1) {
         await channel.send("Genshin Impact: Spiral Abyss reset tomorrow!");
-      } 
+      }
       return;
     }
   } catch (error) {
@@ -240,25 +248,18 @@ export async function birthdayReminder() {
     day = "0" + day;
   }
   const birthdayData = await birthday.find({ birthday: `${month}/${day}` });
+  if (!birthdayData || birthdayData.length === 0) return;
   const nameList = birthdayData.map(
     (e: any) => `${toTitleCase(e.name)} ` + `<@${e.userId}>`
   );
-  const listString = nameList.join("\n");
   try {
-    if (!channel) {
-      console.log("Channel not found");
-      return;
-    }
-    if (channel.isTextBased() && nameList.length > 0) {
-      const birthdayEmbed = new EmbedBuilder()
-        .setColor("#0099ff") // Set the color of the embed
-        .setTitle("Today's Birthdays") // Set the title of the embed
-        .setDescription(`\n${listString}`) // Set the description (main content) of the embed
-        .setTimestamp() // Optionally, you can add a timestamp
-        .setFooter({ text: "Happy Birthday!" }); // Optionally, add a footer
-
-      await channel.send({ embeds: [birthdayEmbed] });
-    }
+    if (!channel || !channel.isTextBased()) return;
+    const birthdayEmbed = new EmbedBuilder()
+      .setColor("#0099ff") // Set the color of the embed
+      .setTitle("Today's Birthdays") // Set the title of the embed
+      .setDescription(`${nameList.join("\n")}`) // Set the description (main content) of the embed
+      .setFooter({ text: "Happy Birthday!" }); // Optionally, add a footer
+    await channel.send({ embeds: [birthdayEmbed] });
   } catch (error) {
     console.error("Error sending message:", error);
     return "Failed to fetch the quote. Please try again later.";
@@ -267,7 +268,7 @@ export async function birthdayReminder() {
 
 export async function ideaChecker(messageAuthor: string, message: string) {
   try {
-    const newIdea = new idea({userId: messageAuthor,idea: message,});
+    const newIdea = new idea({ userId: messageAuthor, idea: message });
     await newIdea.save();
     const currentDate = formatDateToMMDDYYYY(new Date());
     const trackerLookup = await tracker.findOneAndUpdate(
@@ -288,7 +289,7 @@ async function dailyMessageChecker(messageAuthor: string) {
   endOfDay.setHours(23, 59, 59, 999);
   const lookup = await idea.find({
     userId: messageAuthor,
-    createdAt: {$gte: startOfDay, $lte: endOfDay},
+    createdAt: { $gte: startOfDay, $lte: endOfDay },
   });
   if (lookup.length < 5) return;
   if (lookup.length >= 5) {
@@ -299,36 +300,39 @@ async function dailyMessageChecker(messageAuthor: string) {
       userId: messageAuthor,
       date: trackerDate,
     });
-    if (!trackerLookup || trackerLookup.messagedToday) return
+    if (!trackerLookup || trackerLookup.messagedToday) return;
     if (!trackerLookup.messagedToday) {
-    await tracker.findOneAndUpdate({ userId: messageAuthor, date: trackerDate }, { messagedToday: true });
-    await channel.send(`☀️ <@${messageAuthor}>`);
+      await tracker.findOneAndUpdate(
+        { userId: messageAuthor, date: trackerDate },
+        { messagedToday: true }
+      );
+      await channel.send(`☀️ <@${messageAuthor}>`);
     }
   }
 }
 
 //everyday at 9am CST it shows who made the 5 ideas
-export async function dailyIdeaBoard(){
-    const lookup = await tracker.find({
-        date: YesterdaysDate(),
-      });
-    if (!lookup || lookup.length === 0) return;
-    const channel = await client.channels.fetch(`${activeChannel}`);
-    if (!channel || !channel.isTextBased()) return;
-    const messages = lookup.map((e:any) => `<@${e.userId}> ${e.messagedToday ? '☀️' : '⛈️'}`).join('\n');
-    if (!messages) return;
-    const trackerEmbed = new EmbedBuilder()
+export async function dailyIdeaBoard() {
+  const lookup = await tracker.find({
+    date: YesterdaysDate(),
+  });
+  if (!lookup || lookup.length === 0) return;
+  const channel = await client.channels.fetch(`${activeChannel}`);
+  if (!channel || !channel.isTextBased()) return;
+  const messages = lookup
+    .map((e: any) => `<@${e.userId}> ${e.messagedToday ? "☀️" : "⛈️"}`)
+    .join("\n");
+  if (!messages) return;
+  const trackerEmbed = new EmbedBuilder()
     .setColor("#0099ff")
     .setTitle("Daily Checkups for yesterday's ideas")
     .setDescription(messages);
-    await channel.send({ embeds: [trackerEmbed] });
+  await channel.send({ embeds: [trackerEmbed] });
 }
-
-
 
 //Daily Reset for the tracker
 
-export async function dailyTrackerReset(){
+export async function dailyTrackerReset() {
   const trackerLookup = await tracker.find({
     date: YesterdaysDate(),
   });
@@ -345,11 +349,6 @@ export async function dailyTrackerReset(){
 
   await Promise.all(newTrackers);
 }
-
-
-
-
-
 
 //UTILITIES
 
@@ -376,17 +375,17 @@ export function formatDateToMMDDYYYY(date: any) {
 }
 
 export function YesterdaysDate() {
-    // Subtract one day from the current date
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-  
-    let month:any = yesterday.getMonth() + 1; // JavaScript months are zero-indexed
-    let day:any = yesterday.getDate();
-    const year = yesterday.getFullYear();
-  
-    // Add leading zeroes if necessary
-    month = month < 10 ? "0" + month : month;
-    day = day < 10 ? "0" + day : day;
-  
-    return `${month}-${day}-${year}`;
-  }
+  // Subtract one day from the current date
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  let month: any = yesterday.getMonth() + 1; // JavaScript months are zero-indexed
+  let day: any = yesterday.getDate();
+  const year = yesterday.getFullYear();
+
+  // Add leading zeroes if necessary
+  month = month < 10 ? "0" + month : month;
+  day = day < 10 ? "0" + day : day;
+
+  return `${month}-${day}-${year}`;
+}
