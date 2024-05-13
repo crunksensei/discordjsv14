@@ -33,19 +33,19 @@ function scheduleJob(cronTime:string, jobFunction:any) {
 
 // async function testing(){
 //   try {
-//   GameEvents();
-  // randomQuote();
-  // birthdayReminder();
-  // firstOfDaMonth();
-  // dailyIdeaBoard();
-  // fridayMemes();
-  // devMeetings();
+//   // GameEvents();
+//   // randomQuote();
+//   birthdayReminder();
+//   // firstOfDaMonth();
+//   // dailyIdeaBoard();
+//   // fridayMemes();
+//   // devMeetings();
 //   } catch (error) {
 //     console.log(error);
 //   }
 // }
-
-// const testingjob = scheduleJob('10 * * * * *', testing);
+// //OHHH MY GOODNESS Y SO DUMBBBOOO
+// const testingjob = scheduleJob('*/10 * * * * *', testing);
 
 // Define job functions
 function jobFunctions() {
@@ -83,8 +83,8 @@ client.on('messageCreate', async message => {
     const channel = await client.channels.fetch(`${process.env.IDEACORECHANNEL}`)
     const channel2 = await client.channels.fetch(`${process.env.IDEAPROGRESSCHANNEL}`)
     const channel3 = await client.channels.fetch(`${process.env.IDEAMISCCHANNEL}`)
-    if (!channel || !channel2 || !channel3) return;
-    if (channel.isTextBased() || channel2.isTextBased() || channel3.isTextBased()){
+    if (!channel || !channel2 || !channel3 || !channel.isTextBased() || !channel2.isTextBased() || !channel3.isTextBased()) return;
+    if (message.channelId === channel.id || message.channelId === channel2.id || message.channelId === channel3.id){
       ideaChecker(message.author.id, message.content)
     }
 })
