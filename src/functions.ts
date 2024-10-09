@@ -26,7 +26,7 @@ const testChannel = `${process.env.test_Channel}`;
 const gameStudioGuild = `${process.env.gameStudio}`;
 const fs = require("fs");
 
-const activeChannel = gameStudioGuild;
+const activeChannel = testChannel;
 
 type colorType = "text" | "variable" | "error";
 
@@ -99,12 +99,22 @@ export const setGuildOption = async (
   foundGuild.save();
 };
 
+//Game Events
+
 export async function GameEvents() {
+  //Genshin Impact
+  SprialAbyss();
+  ImaginariamTheater();
+
+}
+
+//Spiral Abyss Reset
+
+export async function SprialAbyss() {
   const channel = await client.channels.fetch(`${activeChannel}`);
   const today = new Date();
   let year = today.getFullYear();
   let month = today.getMonth();
-  const firstDayNextMonth = new Date(year, month + 1, 1);
   const midMonthReset = new Date(
     year,
     month + (today.getDate() > 16 ? 1 : 0),
@@ -112,23 +122,18 @@ export async function GameEvents() {
   );
   const daysUntil = (date: any) =>
     Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  const daysUntilFirstDayNextMonth = daysUntil(firstDayNextMonth);
   const daysUntilMidMonthReset = daysUntil(midMonthReset);
-  const nearestReset = Math.min(
-    daysUntilFirstDayNextMonth,
-    daysUntilMidMonthReset
-  );
   try {
     if (!channel) {
       console.log("Channel not found");
       return;
     }
     if (channel.isTextBased()) {
-      if (nearestReset == 5) {
+      if (daysUntilMidMonthReset == 5) {
         await channel.send("Genshin Impact: 5 days left for the Spiral Abyss");
-      } else if (nearestReset == 3) {
+      } else if (daysUntilMidMonthReset == 3) {
         await channel.send("Genshin Impact: 3 days left for the Spiral Abyss");
-      } else if (nearestReset == 1) {
+      } else if (daysUntilMidMonthReset == 1) {
         await channel.send("Genshin Impact: Spiral Abyss reset tomorrow!");
       }
       return;
@@ -138,6 +143,37 @@ export async function GameEvents() {
     return "Failed to fetch the quote. Please try again later.";
   }
 }
+
+//Imaginarium Theater Reset
+
+export async function ImaginariamTheater() {
+  const channel = await client.channels.fetch(`${activeChannel}`);
+  const today = new Date();
+  const firstOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  const daysUntil = (date: Date) =>
+    Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntilFirstOfMonth = daysUntil(firstOfNextMonth);
+
+  try {
+    if (!channel) {
+      console.log("Channel not found");
+      return;
+    }
+    if (channel.isTextBased()) {
+      if (daysUntilFirstOfMonth == 5) {
+        await channel.send("Imaginarium Theater: 5 days left until the new show!");
+      } else if (daysUntilFirstOfMonth == 3) {
+        await channel.send("Imaginarium Theater: 3 days left until the new show!");
+      } else if (daysUntilFirstOfMonth == 1) {
+        await channel.send("Imaginarium Theater: New show starts tomorrow!");
+      }
+    }
+  } catch (error) {
+    console.error("Error sending message:", error);
+    return "Failed to send Imaginarium Theater reminder. Please try again later.";
+  }
+}
+
 
 export async function randomQuote() {
   const channel = await client.channels.fetch(`${activeChannel}`);
@@ -336,9 +372,7 @@ export async function dailyTrackerReset() {
   const trackerLookup = await tracker.find({
     date: YesterdaysDate(),
   });
-
   if (!trackerLookup || trackerLookup.length === 0) return;
-
   const newTrackers = trackerLookup.map(({ userId }: { userId: string }) => {
     return new tracker({
       userId,
@@ -346,7 +380,6 @@ export async function dailyTrackerReset() {
       date: formatDateToMMDDYYYY(new Date()),
     }).save();
   });
-
   await Promise.all(newTrackers);
 }
 

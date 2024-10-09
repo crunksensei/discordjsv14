@@ -20,7 +20,7 @@ const command: SlashCommand = {
         .addStringOption(option =>
             option
                 .setName("date")
-                .setDescription("Enter the birthday date in format (MM/DD/YYYY).")
+                .setDescription("Enter the birthday date in format (MM/DD).")
                 .setRequired(true)
         )
         .setDescription("Add Birthday to database."),
