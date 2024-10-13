@@ -53,10 +53,10 @@ function scheduleJob(cronTime: string, jobFunction: any) {
 //   try {
 //   // GameEvents();
 //   // randomQuote();
-//   birthdayReminder();
+//   // birthdayReminder();
 //   // firstOfDaMonth();
 //   // dailyIdeaBoard();
-//   // fridayMemes();
+//   fridayMemes();
 //   // devMeetings();
 //   } catch (error) {
 //     console.log(error);

@@ -15,6 +15,7 @@ import mongoose from "mongoose";
 import client from "./index";
 import { fridayQuotes } from "./textQuotes/fridayQuotes";
 import { time, timeStamp } from "console";
+import path from 'path';
 require("dotenv").config();
 const quote = require("./schemas/quote");
 const birthday = require("./schemas/birthdays");
@@ -25,6 +26,8 @@ const productionChannel = `${process.env.famDiscord}`;
 const testChannel = `${process.env.test_Channel}`;
 const gameStudioGuild = `${process.env.gameStudio}`;
 const fs = require("fs");
+
+
 
 const activeChannel = testChannel;
 
@@ -215,32 +218,51 @@ export async function devMeetings() {
 
 export async function fridayMemes() {
   const channel = await client.channels.fetch(`${activeChannel}`);
-  const Memes = ["Videos/flatFuckFriday.mp4", "Videos/rebeccaBlackFriday.mp4"];
-  const randomMeme = Math.floor(Math.random() * Memes.length);
-  const randomQuote = Math.floor(Math.random() * fridayQuotes.length);
-
+  const memesFolder = 'Videos/friday'; // Specify the folder containing the memes
+  
   try {
-    if (!channel) {
-      console.log("Channel not found");
+    if (!channel || !channel.isTextBased()) {
       return;
     }
-    if (channel.isTextBased()) {
-      const birthdayEmbed = new EmbedBuilder()
-        .setColor("#0000FF")
-        .setTitle(`Its Friday`)
-        .setDescription(`${fridayQuotes[randomQuote]}`);
 
-      if (fs.existsSync(Memes[0])) {
-        const videoAttachment = new AttachmentBuilder(Memes[randomMeme]);
-        await channel.send({
-          embeds: [birthdayEmbed],
-          files: [videoAttachment],
-        });
-      }
+    // Read all files in the memes folder
+    const files: any = await new Promise((resolve, reject) => {
+      fs.readdir(memesFolder, (err:any, files:any) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(files);
+        }
+      });
+    });
+    console.log(files);
+    const videoFiles = files.filter((file:string) => 
+      ['.mp4', '.mov', '.avi'].includes(path.extname(file).toLowerCase())
+    );
+
+    if (videoFiles.length === 0) {
+      console.log("No video files found in the memes folder");
+      return;
     }
+
+    const randomMeme = videoFiles[Math.floor(Math.random() * videoFiles.length)];
+    const randomQuote = Math.floor(Math.random() * fridayQuotes.length);
+
+    const fridayEmbed = new EmbedBuilder()
+      .setColor("#0000FF")
+      .setTitle(`It's Friday`)
+      .setDescription(`${fridayQuotes[randomQuote]}`);
+
+    const videoAttachment = new AttachmentBuilder(path.join(memesFolder, randomMeme));
+    
+    await channel.send({
+      embeds: [fridayEmbed],
+      files: [videoAttachment],
+    });
+
   } catch (error) {
-    console.error("Error sending message:", error);
-    return "Failed send meeting message.";
+    console.error("Error sending Friday meme:", error);
+    return "Failed to send Friday meme.";
   }
 }
 
